@@ -14,13 +14,16 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 @bot.event
 async def on_ready():
     print("--- Bot is starting up ---")
-
+    
     # ვტვირთავთ ყველა ჩვენს ბრძანების ფაილს
     await bot.load_extension('counting_cog')
     print("Loaded: counting_cog.py")
-
+    
     await bot.load_extension('fun_cog')
     print("Loaded: fun_cog.py")
+
+    await bot.load_extension('tictactoe_cog') # <-- დამატებული ხაზი
+    print("Loaded: tictactoe_cog.py")
 
     # ვარეგისტრირებთ ბრძანებებს Discord-თან
     try:
@@ -28,8 +31,8 @@ async def on_ready():
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(f"Error syncing commands: {e}")
-
-    print("--- Bot is ready! ---")
+        
+    print("--- Bot is ready!!! ---")
         
 
 bot.run(BOT_TOKEN)
