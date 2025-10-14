@@ -29,8 +29,10 @@ class CountingCog(commands.Cog):
         guild_id = str(message.guild.id)
         if guild_id not in self.data or "channel_id" not in self.data[guild_id]: return
         if message.channel.id != self.data[guild_id]["channel_id"]: return
+        
         current_count = self.data[guild_id].get("count", 0)
         last_user_id = self.data[guild_id].get("last_user_id", None)
+        
         if message.author.id == last_user_id:
             try:
                 await message.delete()
@@ -40,16 +42,29 @@ class CountingCog(commands.Cog):
             self.data[guild_id].update({"count": 0, "last_user_id": None})
             save_data(self.data)
             return
+            
         try: number = int(message.content)
         except ValueError:
             try: await message.delete()
             except discord.Forbidden: pass
             return
+            
         if number == current_count + 1:
-            self.data[guild_id].update({"count": current_count + 1, "last_user_id": message.author.id})
+            # --- ახალი კოდი იწყება აქ ---
+            new_count = current_count + 1
+            self.data[guild_id].update({"count": new_count, "last_user_id": message.author.id})
             save_data(self.data)
-            try: await message.add_reaction("✅")
-            except discord.Forbidden: pass
+
+            # ვამოწმებთ, არის თუ არა რიცხვი 100-ის ჯერადი
+            if new_count % 100 == 0 and new_count != 0:
+                try:
+                    await message.add_reaction("💯")
+                    await message.channel.send(f"🎉 **გილოცავთ!** თქვენ მიაღწიეთ **{new_count}**-ს! 🎉")
+                except discord.Forbidden: pass
+            else:
+                try: await message.add_reaction("✅")
+                except discord.Forbidden: pass
+            # --- ახალი კოდი მთავრდება აქ ---
         else:
             try:
                 await message.delete()
@@ -59,6 +74,7 @@ class CountingCog(commands.Cog):
             self.data[guild_id].update({"count": 0, "last_user_id": None})
             save_data(self.data)
 
+    # ... დანარჩენი კოდი (c on, c off, leaderboard) უცვლელი რჩება ...
     @c_group.command(name="on", description="აყენებს არხს დათვლისთვის.")
     @app_commands.describe(channel="აირჩიეთ არხი, სადაც დათვლა დაიწყება.")
     @app_commands.checks.has_permissions(manage_guild=True)
