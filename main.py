@@ -33,3 +33,4 @@ async def on_ready():
         
 
 bot.run(BOT_TOKEN)
+print("--- Bot is ready!!! ---")
