@@ -15,10 +15,12 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 async def on_ready():
     print(f'Logged in as {bot.user}')
     await bot.load_extension('counting_cog')
+    await bot.load_extension('fun_cog')
     try:
         synced = await bot.tree.sync()
         print(f"Synced {len(synced)} command(s)")
     except Exception as e:
         print(f"Error syncing commands: {e}")
+        
 
 bot.run(BOT_TOKEN)
