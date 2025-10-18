@@ -19,7 +19,7 @@ class CountingCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
         self.data = load_data()
-        self.footer_text = "Bot Owned By - Teddy"
+        self.footer_text = "ბოტის მფლობელი - Teddy"
 
     c_group = app_commands.Group(name="c", description="დათვლის სისტემის მართვა")
 
@@ -29,79 +29,70 @@ class CountingCog(commands.Cog):
         guild_id = str(message.guild.id)
         if guild_id not in self.data or "channel_id" not in self.data[guild_id]: return
         if message.channel.id != self.data[guild_id]["channel_id"]: return
-        
         current_count = self.data[guild_id].get("count", 0)
         last_user_id = self.data[guild_id].get("last_user_id", None)
-        
         if message.author.id == last_user_id:
             try:
                 await message.delete()
-                error_msg = await message.channel.send(f"{message.author.mention}, ზედიზედ ორჯერ ვერ დაწერთ! დათვლა განულდა.")
+                error_msg = await message.channel.send(f"{message.author.mention} ზედიზედ ვერ დაწერ დათვლა თავიდან დაიწყო")
                 await error_msg.delete(delay=5)
             except discord.Forbidden: pass
             self.data[guild_id].update({"count": 0, "last_user_id": None})
             save_data(self.data)
             return
-            
         try: number = int(message.content)
         except ValueError:
             try: await message.delete()
             except discord.Forbidden: pass
             return
-            
         if number == current_count + 1:
-            # --- ახალი კოდი იწყება აქ ---
             new_count = current_count + 1
             self.data[guild_id].update({"count": new_count, "last_user_id": message.author.id})
             save_data(self.data)
-
-            # ვამოწმებთ, არის თუ არა რიცხვი 100-ის ჯერადი
             if new_count % 100 == 0 and new_count != 0:
                 try:
                     await message.add_reaction("💯")
-                    await message.channel.send(f"🎉 **გილოცავთ!** თქვენ მიაღწიეთ **{new_count}**-ს! 🎉")
+                    await message.channel.send(f"🎉 გილოცავ მიაღწიე **{new_count}**-ს 🎉")
                 except discord.Forbidden: pass
             else:
                 try: await message.add_reaction("✅")
                 except discord.Forbidden: pass
-            # --- ახალი კოდი მთავრდება აქ ---
         else:
             try:
                 await message.delete()
-                error_msg = await message.channel.send(f"{message.author.mention}, არასწორი რიცხვია! შემდეგი რიცხვი უნდა იყოს **{current_count + 1}**. დათვლა განულდა.")
+                error_msg = await message.channel.send(f"{message.author.mention} არაა სწორი შემდეგი რიცხვია **{current_count + 1}** დათვლა თავიდან დაიწყო")
                 await error_msg.delete(delay=7)
             except discord.Forbidden: pass
             self.data[guild_id].update({"count": 0, "last_user_id": None})
             save_data(self.data)
 
-    # ... დანარჩენი კოდი (c on, c off, leaderboard) უცვლელი რჩება ...
-    @c_group.command(name="on", description="აყენებს არხს დათვლისთვის.")
-    @app_commands.describe(channel="აირჩიეთ არხი, სადაც დათვლა დაიწყება.")
+    @c_group.command(name="on", description="აყენებს არხს დათვლისთვის")
+    @app_commands.describe(channel="აირჩიეთ არხი სადაც დათვლა დაიწყება")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def setup_counting(self, interaction: discord.Interaction, channel: discord.TextChannel):
         guild_id = str(interaction.guild.id)
         self.data[guild_id] = {"channel_id": channel.id, "count": 0, "last_user_id": None}
         save_data(self.data)
-        embed = discord.Embed(title="✅ დათვლის სისტემა დაყენებულია", description=f"დათვლა წარმატებით დაყენდა {channel.mention} არხზე.\nდაიწყეთ **1**-ით!", color=discord.Color.green())
+        embed = discord.Embed(title="✅ დათვლის სისტემა დაყენებულია", description=f"დათვლა წარმატებით დაყენდა {channel.mention} არხზე\nდაიწყეთ **1**-ით!", color=discord.Color.green())
         embed.set_footer(text=self.footer_text)
         await interaction.response.send_message(embed=embed)
 
-    @c_group.command(name="off", description="თიშავს დათვლის სისტემას სერვერზე.")
+    @c_group.command(name="off", description="თიშავს დათვლის სისტემას სერვერზე")
     @app_commands.checks.has_permissions(manage_guild=True)
     async def disable_counting(self, interaction: discord.Interaction):
         guild_id = str(interaction.guild.id)
         if guild_id in self.data:
             del self.data[guild_id]
             save_data(self.data)
-            embed = discord.Embed(title="❌ დათვლის სისტემა გათიშულია", description="სისტემა ამ სერვერზე გაითიშა.", color=discord.Color.red())
+            embed = discord.Embed(title="❌ დათვლის სისტემა გათიშულია", description="სისტემა ამ სერვერზე გაითიშა", color=discord.Color.red())
             embed.set_footer(text=self.footer_text)
             await interaction.response.send_message(embed=embed)
         else:
-            embed = discord.Embed(title="⚠️ შეცდომა", description="სისტემა ამ სერვერზე უკვე გათიშულია.", color=discord.Color.orange())
+            embed = discord.Embed(title="⚠️ შეცდომა", description="სისტემა ამ სერვერზე უკვე გათიშულია", color=discord.Color.orange())
             embed.set_footer(text=self.footer_text)
             await interaction.response.send_message(embed=embed, ephemeral=True)
 
-    @app_commands.command(name="leaderboard", description="აჩვენებს სერვერების დათვლის ლიდერბორდს.")
+    @app_commands.command(name="leaderboard", description="აჩვენებს სერვერების დათვლის ლიდერბორდს")
     async def leaderboard(self, interaction: discord.Interaction):
         self.data = load_data()
         if not self.data:
@@ -114,9 +105,9 @@ class CountingCog(commands.Cog):
         rank = 1
         for guild_id, guild_data in sorted_guilds[:10]:
             guild = self.bot.get_guild(int(guild_id))
-            guild_name = guild.name if guild else f"Unknown Server (ID: {guild_id})"
+            guild_name = guild.name if guild else f"უცნობი სერვერი (ID: {guild_id})"
             count = guild_data.get('count', 0)
-            embed.add_field(name=f"{rank}. {guild_name}", value=f"**Score: {count}**", inline=False)
+            embed.add_field(name=f"{rank}. {guild_name}", value=f"**ქულა: {count}**", inline=False)
             rank += 1
         embed.set_footer(text=self.footer_text)
         await interaction.response.send_message(embed=embed)
@@ -125,7 +116,7 @@ class CountingCog(commands.Cog):
     @disable_counting.error
     async def on_counting_error(self, interaction: discord.Interaction, error: app_commands.AppCommandError):
         if isinstance(error, app_commands.MissingPermissions):
-            await interaction.response.send_message("ამ ბრძანების გამოსაყენებლად არ გაქვთ საკმარისი უფლებები!", ephemeral=True)
+            await interaction.response.send_message("ამ ბრძანების უფლება არ გაქვს", ephemeral=True)
         else: raise error
 
 async def setup(bot: commands.Bot):
