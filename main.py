@@ -4,45 +4,46 @@ import os
 
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
 if BOT_TOKEN is None:
-    print("FATAL ERROR: BOT_TOKEN ar aris motavsebuli Railway Variables-shi.")
+    print("ფატალური შეცდომა: BOT_TOKEN არ არის Railway-ს ცვლადებში.")
     exit()
 
-# --- Botis uflebebi (Intents) ---
+# --- ბოტის უფლებები (Intents) ---
 intents = discord.Intents.default()
-intents.members = True       # aucilebelia Welcome, Auto-Role, Stats-istvis
-intents.message_content = True # aucilebelia Counting-istvis
+intents.members = True
+intents.message_content = True 
 
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.event
 async def on_ready():
-    print(f"Bot chartulia rogorc {bot.user}")
+    print(f"ბოტი ჩაირთო როგორც {bot.user}")
     print("-" * 30)
     
-    # --- Yvela funqciis (Cogs) chatvirtva ---
+    # --- ყველა ფუნქციის (Cogs) ჩატვირთვა ---
     cogs_to_load = [
         'counting_cog',
         'fun_cog',
         'welcome_and_roles_cog',
         'giveaway_cog',
-        'server_management_cog'
+        'server_management_cog',
+        'tictactoe_cog' # დავამატეთ ტიკ-ტაკ-ტოუ
     ]
     
     for cog in cogs_to_load:
         try:
             await bot.load_extension(cog)
-            print(f"Warmatebit chaitvirta: {cog}")
+            print(f"წარმატებით ჩაიტვირთა: {cog}")
         except Exception as e:
-            print(f"ERROR: Ver chaitvirta {cog}: {e}")
+            print(f"შეცდომა: ვერ ჩაიტვირთა {cog}: {e}")
 
     print("-" * 30)
 
-    # --- Slesh brdzanebebis daregistrireba ---
+    # --- სლეშ ბრძანებების რეგისტრაცია ---
     try:
         synced = await bot.tree.sync()
-        print(f"Warmatebit daregistrirda {len(synced)} brdzaneba.")
+        print(f"წარმატებით დარეგისტრირდა {len(synced)} ბრძანება.")
     except Exception as e:
-        print(f"Error brdzanebebis registraciisas: {e}")
+        print(f"შეცდომა ბრძანებების რეგისტრაციისას: {e}")
     
     print("-" * 30)
 
