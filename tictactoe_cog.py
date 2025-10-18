@@ -23,10 +23,8 @@ class TicTacToeView(discord.ui.View):
         if interaction.user != self.current_player:
             await interaction.response.send_message("შენი სვლა არ არის!", ephemeral=True)
             return
-        
         button = interaction.data["custom_id"]
         clicked_button = next(b for b in self.children if b.custom_id == button)
-
         if self.current_player == self.player1:
             clicked_button.label = "X"
             clicked_button.style = discord.ButtonStyle.danger
@@ -37,7 +35,6 @@ class TicTacToeView(discord.ui.View):
             clicked_button.style = discord.ButtonStyle.success
             self.current_player = self.player1
             next_turn_text = f"ახლა {self.player1.mention}-ის სვლაა (X)"
-        
         clicked_button.disabled = True
         winner = self.check_winner()
         if winner:
@@ -63,8 +60,8 @@ class TicTacToeCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @app_commands.command(name="tictactoe", description="იწყებს იქსიკი და ნოლიკის თამაშს.")
-    @app_commands.describe(opponent="აირჩიე მოწინააღმდეგე.")
+    @app_commands.command(name="tictactoe", description="იწყებს იქსიკი და ნოლიკის თამაშს")
+    @app_commands.describe(opponent="აირჩიე მოწინააღმდეგე")
     async def tictactoe(self, interaction: discord.Interaction, opponent: discord.Member):
         player1 = interaction.user
         player2 = opponent
