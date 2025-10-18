@@ -2,65 +2,48 @@ import discord
 from discord.ext import commands
 import os
 
-# ვიღებთ ბოტის ტოკენს Railway-ს საიდუმლო ველიდან
 BOT_TOKEN = os.environ.get('BOT_TOKEN')
-
 if BOT_TOKEN is None:
-    print("FATAL ERROR: BOT_TOKEN not found in environment variables.")
+    print("FATAL ERROR: BOT_TOKEN ar aris motavsebuli Railway Variables-shi.")
     exit()
 
-# --- ბოტის უფლებების (Intents) დაყენება ---
-# ჩვენ გვჭირდება "Members" და "Message Content" უფლებები,
-# რომ Welcome, Stats და Counting ფუნქციებმა იმუშაოს.
+# --- Botis uflebebi (Intents) ---
 intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True 
+intents.members = True       # aucilebelia Welcome, Auto-Role, Stats-istvis
+intents.message_content = True # aucilebelia Counting-istvis
 
-# ვქმნით ბოტის ობიექტს ამ უფლებებით
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-# ეს ფუნქცია მუშაობს, როცა ბოტი წარმატებით ირთვება
 @bot.event
 async def on_ready():
-    print(f"Logged in as {bot.user} (ID: {bot.user.id})")
-    print("Bot is ready and online!")
+    print(f"Bot chartulia rogorc {bot.user}")
     print("-" * 30)
     
-    # --- ვიწყებთ ყველა ჩვენი ფუნქციის (Cogs) ჩატვირთვას ---
+    # --- Yvela funqciis (Cogs) chatvirtva ---
     cogs_to_load = [
-        'counting_cog',           # დათვლის სისტემა
-        'fun_cog',                # /gay da /8ball
-        'welcome_and_roles_cog',  # მისალმება და ავტო-როლი
-        'giveaway_cog',           # გათამაშებები
-        'server_management_cog'   # Stats, Clear, Poll, Notifications
+        'counting_cog',
+        'fun_cog',
+        'welcome_and_roles_cog',
+        'giveaway_cog',
+        'server_management_cog'
     ]
     
-    loaded_cogs = []
-    failed_cogs = []
-
     for cog in cogs_to_load:
         try:
             await bot.load_extension(cog)
-            loaded_cogs.append(cog)
+            print(f"Warmatebit chaitvirta: {cog}")
         except Exception as e:
-            print(f"FAILED to load cog '{cog}': {e}")
-            failed_cogs.append(f"{cog} ({e})")
+            print(f"ERROR: Ver chaitvirta {cog}: {e}")
 
-    print("\n--- Cog Loading Summary ---")
-    print(f"Successfully loaded: {', '.join(loaded_cogs)}")
-    if failed_cogs:
-        print(f"FAILED to load: {', '.join(failed_cogs)}")
-    
     print("-" * 30)
 
-    # --- სლეშ ბრძანებების რეგისტრაცია (Sync) ---
+    # --- Slesh brdzanebebis daregistrireba ---
     try:
         synced = await bot.tree.sync()
-        print(f"Synced {len(synced)} slash command(s) successfully.")
+        print(f"Warmatebit daregistrirda {len(synced)} brdzaneba.")
     except Exception as e:
-        print(f"Error syncing commands: {e}")
+        print(f"Error brdzanebebis registraciisas: {e}")
     
     print("-" * 30)
 
-# ვუშვებთ ბოტს ტოკენის გამოყენებით
 bot.run(BOT_TOKEN)
